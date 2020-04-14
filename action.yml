@@ -1,0 +1,37 @@
+name: Octopus Deploy Build Information
+description: Generate build information for Octopus Deploy
+inputs:
+  octopus-api-key:
+    description: Authentication key for the Octopus Deploy API
+    required: false
+    default: ${{ env.OCTOPUS_CLI_API_KEY }}
+  octopus-server:
+    description: URL of the Octopus Deploy server
+    required: false
+    default: ${{ env.OCTOPUS_CLI_SERVER }}
+  octopus-environment:
+    description: Name of the Octopus Deploy environment
+    required: false
+    default: ${{ env.OCTOPUS_ENVIRONMENT }}
+  octopus-project:
+    description: Name of the Octopus Deploy project
+    required: false
+    default: ${{ env.OCTOPUS_PROJECT }}
+  octopus-space:
+    description: Name of the Octopus Deploy space
+    required: false
+    default: ${{ env.OCTOPUS_SPACE }}
+  output:
+    description: Path to the output file
+    required: true
+    default: buildInformation.json
+  version-tag-prefix:
+    description: Prefix for release version tags in the repository (e.g. 'v')
+    required: true
+    default: v
+runs:
+  using: node12
+  main: dist/index.js 
+branding:
+  icon: file-plus
+  color: blue
