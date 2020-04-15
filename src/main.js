@@ -1,25 +1,51 @@
 const core = require("@actions/core");
 const { context, GitHub } = require("@actions/github");
 const fs = require("fs").promises;
+const { defaults, pickBy } = require("lodash");
 const nodeFetch = require("node-fetch");
 const { URL } = require("url");
 
+const inputs = defaults(
+  // use specific inputs when set
+  pickBy({
+    octopusApiKey: core.getInput("octopus-api-key"),
+    octopusServer: core.getInput("octopus-server"),
+    octopusEnvironment: core.getInput("octopus-environment"),
+    octopusProject: core.getInput("octopus-project"),
+    octopusSpace: core.getInput("octopus-space"),
+    output: core.getInput("output", { required: true }),
+    versionTagPrefix: core.getInput("version-tag-prefix", { required: true }),
+  }),
+  // use environment variables as a fallback
+  pickBy({
+    octopusApiKey: process.env.OCTOPUS_CLI_API_KEY,
+    octopusServer: process.env.OCTOPUS_CLI_SERVER,
+    octopusEnvironment: process.env.OCTOPUS_ENVIRONMENT,
+    octopusProject: process.env.OCTOPUS_PROJECT,
+    octopusSpace: process.env.OCTOPUS_SPACE,
+  }),
+  // use these explicit defaults
+  {
+    octopusEnvironment: "Production",
+  }
+);
+
 async function octopusFetch(spaceId, resource, params = {}) {
-  const octopusHeaders = {
-    "X-Octopus-ApiKey": core.getInput("octopus-api-key", { required: true }),
-  };
-  const octopusServer = new URL(core.getInput("octopus-server", { required: true }));
+  if (!inputs.octopusApiKey) throw new Error("Missing required input: octopus-api-key");
+  if (!inputs.octopusServer) throw new Error("Missing required input: octopus-server");
 
   const url = spaceId
-    ? new URL(`/api/${spaceId}/${resource}`, octopusServer)
-    : new URL(`/api/${resource}`, octopusServer);
+    ? new URL(`/api/${spaceId}/${resource}`, inputs.octopusServer)
+    : new URL(`/api/${resource}`, inputs.octopusServer);
 
   url.search = new URLSearchParams(params);
   core.debug(`Octopus Deploy API request ${url}`);
 
   const response = await nodeFetch(url, {
     method: "GET",
-    headers: octopusHeaders,
+    headers: {
+      "X-Octopus-ApiKey": inputs.octopusApiKey,
+    },
   });
   core.debug(
     // eslint-disable-next-line prettier/prettier
@@ -34,18 +60,13 @@ function octopusFuzzyMatch(item, search) {
 }
 
 async function getPreviousRef(github) {
-  const environmentName = core.getInput("octopus-environment") || "Production";
-  const projectName = core.getInput("octopus-project");
-  const spaceName = core.getInput("octopus-space");
-  const versionTagPrefix = core.getInput("version-tag-prefix", { required: true });
-
   let space;
   let project;
   let environment;
   let deployment;
 
   // without a project name, give up immediately
-  if (!projectName) {
+  if (!inputs.octopusProject) {
     core.info("Octopus project name undefined; skipping commits detection");
     return undefined;
   }
@@ -54,11 +75,11 @@ async function getPreviousRef(github) {
   try {
     const payload = await octopusFetch(null, "spaces");
 
-    space =
-      payload.Items.find((item) => octopusFuzzyMatch(item, spaceName)) ||
-      payload.Items.find((item) => item.IsDefault);
-    if (spaceName && spaceName !== space.Name) {
-      throw new Error(`No space named '${spaceName}' was found`);
+    space = inputs.octopusSpace
+      ? payload.Items.find((item) => octopusFuzzyMatch(item, inputs.octopusSpace))
+      : payload.Items.find((item) => item.IsDefault);
+    if (!space) {
+      throw new Error(`No space named '${inputs.octopusSpace || "Default"}' was found`);
     }
     core.info(`Detected Octopus space ${space.Name} (${space.Id})`);
   } catch (e) {
@@ -71,9 +92,9 @@ async function getPreviousRef(github) {
     const payload = await octopusFetch(space.Id, `projects`);
 
     // allow project to match name, slug, or id
-    project = payload.Items.find((item) => octopusFuzzyMatch(item, projectName));
+    project = payload.Items.find((item) => octopusFuzzyMatch(item, inputs.octopusProject));
     if (!project) {
-      throw new Error(`No project named '${projectName}' was found`);
+      throw new Error(`No project named '${inputs.octopusProject}' was found`);
     }
     core.info(`Detected Octopus project ${project.Name} (${project.Id})`);
   } catch (e) {
@@ -87,7 +108,7 @@ async function getPreviousRef(github) {
 
     // fall back to the last environment in the sort order
     environment =
-      payload.Items.find((item) => octopusFuzzyMatch(item, environmentName)) ||
+      payload.Items.find((item) => octopusFuzzyMatch(item, inputs.octopusEnvironment)) ||
       payload.Items[payload.Items.length - 1];
     core.info(`Detected Octopus environment ${environment.Name} (${environment.Id})`);
   } catch (e) {
@@ -143,7 +164,7 @@ async function getPreviousRef(github) {
   // we found a version, see if there is a matching tag on GitHub
   core.info(`Detected previous version ${version}, looking for a matching tag...`);
   try {
-    const tag = `${versionTagPrefix}${version}`;
+    const tag = `${inputs.versionTagPrefix}${version}`;
     const response = await github.git.getRef({
       owner: context.repo.owner,
       repo: context.repo.repo,
