@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build src/main.js -m",
-    "lint": "eslint src --fix"
+    "lint": "eslint src --cache --fix"
   },
   "license": "ISC",
   "dependencies": {
