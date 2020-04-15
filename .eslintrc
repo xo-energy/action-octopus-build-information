@@ -1,9 +1,11 @@
 {
   "plugins": [
+    "jest",
     "prettier"
   ],
   "extends": [
     "airbnb-base",
+    "plugin:jest/recommended",
     "plugin:prettier/recommended"
   ],
   "env": {
