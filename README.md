@@ -6,6 +6,7 @@ This GitHub Action (written in JavaScript) generates a JSON build information fi
 
 ### Inputs
 
+- `github_token`: GitHub personal access token. Used get commit history from the repository. Defaults to the token provided by the workflow run.
 - `octopus_api_key`: Authentication key for the Octopus Deploy API. Required when `octopus_project` is present. Can also be set via the environment variable `OCTOPUS_CLI_API_KEY`.
 - `octopus_server`: URL of the Octopus Deploy server. Required when `octopus_project` is present. Can also be set via the environment variable `OCTOPUS_CLI_SERVER`.
 - `octopus_environment`: Use the previous release deployed to this environment to generate commit history. Defaults to "Production". Can also be set via the environment variable `OCTOPUS_ENVIRONMENT`.

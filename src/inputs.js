@@ -4,6 +4,7 @@ const { defaults, pickBy } = require("lodash");
 const inputs = defaults(
   // use specific inputs when set
   pickBy({
+    githubToken: core.getInput("github_token", { required: true }),
     octopusApiKey: core.getInput("octopus_api_key"),
     octopusServer: core.getInput("octopus_server"),
     octopusEnvironment: core.getInput("octopus_environment"),

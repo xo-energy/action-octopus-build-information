@@ -174,7 +174,7 @@ async function getCommits(github, previousRef) {
 
 async function run() {
   try {
-    const github = new GitHub(process.env.GITHUB_TOKEN);
+    const github = new GitHub(inputs.githubToken);
     const previousRef = await getPreviousRef(github);
 
     // compare the previous release to the current tag

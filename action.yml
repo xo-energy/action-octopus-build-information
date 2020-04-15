@@ -1,6 +1,10 @@
 name: Octopus Deploy Build Information
 description: Generate build information for Octopus Deploy
 inputs:
+  github_token:
+    description: GitHub personal access token
+    required: true
+    default: ${{ github.token }}
   octopus_api_key:
     description: Authentication key for the Octopus Deploy API
     required: false
@@ -27,8 +31,6 @@ inputs:
 runs:
   using: node12
   main: dist/index.js
-  env:
-    GITHUB_TOKEN: ${{ github.token }}
 branding:
   icon: file-plus
   color: blue

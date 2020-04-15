@@ -3,6 +3,7 @@ jest.mock("@actions/core");
 jest.unmock("../src/inputs");
 
 const mockInputs = {
+  githubToken: "inputtoken",
   octopusApiKey: "API-input",
   octopusServer: "https://input/",
   octopusEnvironment: "InputEnvironment",
@@ -41,6 +42,9 @@ describe("inputs", () => {
       expect(inputs.octopusEnvironment).toStrictEqual("Production");
     });
 
+    test("is undefined: githubToken", () => {
+      expect(inputs.githubToken).toBeUndefined();
+    });
     test("is undefined: octopusApiKey", () => {
       expect(inputs.octopusApiKey).toBeUndefined();
     });
@@ -82,12 +86,23 @@ describe("inputs", () => {
     test("has env value: octopusSpace", () => {
       expect(inputs.octopusSpace).toStrictEqual(mockEnv.OCTOPUS_SPACE);
     });
+
+    test("is undefined: githubToken", () => {
+      expect(inputs.githubToken).toBeUndefined();
+    });
+    test("is undefined: output", () => {
+      expect(inputs.output).toBeUndefined();
+    });
+    test("is undefined: versionTagPrefix", () => {
+      expect(inputs.versionTagPrefix).toBeUndefined();
+    });
   });
 
   describe("when input is provided", () => {
     beforeEach(() => {
       core.getInput = jest
         .fn()
+        .mockReturnValueOnce(mockInputs.githubToken)
         .mockReturnValueOnce(mockInputs.octopusApiKey)
         .mockReturnValueOnce(mockInputs.octopusServer)
         .mockReturnValueOnce(mockInputs.octopusEnvironment)
@@ -100,6 +115,7 @@ describe("inputs", () => {
 
     test("getInput called with expected args", () => {
       expect(core.getInput.mock.calls).toEqual([
+        ["github_token", { required: true }],
         ["octopus_api_key"],
         ["octopus_server"],
         ["octopus_environment"],
@@ -108,6 +124,9 @@ describe("inputs", () => {
         ["output", { required: true }],
         ["version_tag_prefix", { required: true }],
       ]);
+    });
+    test("has input value: githubToken", () => {
+      expect(inputs.githubToken).toStrictEqual(mockInputs.githubToken);
     });
     test("has input value: octopusApiKey", () => {
       expect(inputs.octopusApiKey).toStrictEqual(mockInputs.octopusApiKey);
@@ -136,6 +155,7 @@ describe("inputs", () => {
     beforeEach(() => {
       core.getInput = jest
         .fn()
+        .mockReturnValueOnce(mockInputs.githubToken)
         .mockReturnValueOnce(mockInputs.octopusApiKey)
         .mockReturnValueOnce(mockInputs.octopusServer)
         .mockReturnValueOnce(mockInputs.octopusEnvironment)
