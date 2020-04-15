@@ -1,26 +1,26 @@
 name: Octopus Deploy Build Information
 description: Generate build information for Octopus Deploy
 inputs:
-  octopus-api-key:
+  octopus_api_key:
     description: Authentication key for the Octopus Deploy API
     required: false
-  octopus-server:
+  octopus_server:
     description: URL of the Octopus Deploy server
     required: false
-  octopus-environment:
+  octopus_environment:
     description: Name of the Octopus Deploy environment
     required: false
-  octopus-project:
+  octopus_project:
     description: Name of the Octopus Deploy project
     required: false
-  octopus-space:
+  octopus_space:
     description: Name of the Octopus Deploy space
     required: false
   output:
     description: Path to the output file
     required: true
     default: buildInformation.json
-  version-tag-prefix:
+  version_tag_prefix:
     description: Prefix for release version tags in the repository (e.g. 'v')
     required: true
     default: v

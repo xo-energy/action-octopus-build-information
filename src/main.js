@@ -8,13 +8,13 @@ const { URL } = require("url");
 const inputs = defaults(
   // use specific inputs when set
   pickBy({
-    octopusApiKey: core.getInput("octopus-api-key"),
-    octopusServer: core.getInput("octopus-server"),
-    octopusEnvironment: core.getInput("octopus-environment"),
-    octopusProject: core.getInput("octopus-project"),
-    octopusSpace: core.getInput("octopus-space"),
+    octopusApiKey: core.getInput("octopus_api_key"),
+    octopusServer: core.getInput("octopus_server"),
+    octopusEnvironment: core.getInput("octopus_environment"),
+    octopusProject: core.getInput("octopus_project"),
+    octopusSpace: core.getInput("octopus_space"),
     output: core.getInput("output", { required: true }),
-    versionTagPrefix: core.getInput("version-tag-prefix", { required: true }),
+    versionTagPrefix: core.getInput("version_tag_prefix", { required: true }),
   }),
   // use environment variables as a fallback
   pickBy({
@@ -31,8 +31,8 @@ const inputs = defaults(
 );
 
 async function octopusFetch(spaceId, resource, params = {}) {
-  if (!inputs.octopusApiKey) throw new Error("Missing required input: octopus-api-key");
-  if (!inputs.octopusServer) throw new Error("Missing required input: octopus-server");
+  if (!inputs.octopusApiKey) throw new Error("Missing required input: octopus_api_key");
+  if (!inputs.octopusServer) throw new Error("Missing required input: octopus_server");
 
   const url = spaceId
     ? new URL(`/api/${spaceId}/${resource}`, inputs.octopusServer)
