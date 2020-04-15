@@ -1,7 +1,6 @@
 {
   "name": "action-octopus-build-information",
   "private": true,
-  "version": "1.0.0",
   "description": "GitHub Action that generates build information for Octopus Deploy",
   "main": "dist/index.js",
   "scripts": {
