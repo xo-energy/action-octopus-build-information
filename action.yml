@@ -28,6 +28,9 @@ inputs:
     description: Prefix for release version tags in the repository (e.g. 'v')
     required: true
     default: v
+outputs:
+  previous_release_sha:
+    description: The commit SHA of the previous release
 runs:
   using: node12
   main: dist/index.js

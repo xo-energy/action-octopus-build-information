@@ -201,6 +201,9 @@ async function run() {
     const path = core.getInput("output", { required: true });
     core.info(`Writing build information to ${path}`);
     await fs.writeFile(path, JSON.stringify(build));
+
+    // output the previous commit
+    if (previousRef) core.setOutput("previous_release_sha", previousRef);
   } catch (e) {
     core.setFailed(e.message);
   }

@@ -16,3 +16,7 @@ This GitHub Action (written in JavaScript) generates a JSON build information fi
 - `version_tag_prefix`: Prefix for release version tags, used to probe for a GitHub release tag when the previous Octopus Deploy deployment metadata contains a version number but not a commit SHA. Defaults to `v`.
 
 The inputs `octopus_environment`, `octopus_project`, and `octopus_space` accept names ("My Project"), slugs ("my-project"), and hyphenated Octopus IDs ("Projects-1").
+
+### Outputs
+
+- `previous_release_sha`: The commit SHA of the previous release, if one was detected by querying Octopus Deploy for the previous deployment.
