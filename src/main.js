@@ -157,19 +157,24 @@ async function getPreviousRef(github) {
 async function getCommits(github, previousRef) {
   if (!previousRef) return [];
 
-  // compare commits
+  // compare commits with pagination
+  let commits = [];
   try {
-    const response = await github.repos.compareCommits({
+    const request = github.repos.compareCommits.endpoint.merge({
       owner: context.repo.owner,
       repo: context.repo.repo,
       base: previousRef,
       head: context.sha,
     });
-    return response.data.commits;
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const response of github.paginate.iterator(request)) {
+      commits = commits.concat(response.data.commits);
+    }
   } catch (e) {
     core.warning(`Failed to compare commits: ${e.message}`);
-    return [];
   }
+
+  return commits;
 }
 
 async function run() {
