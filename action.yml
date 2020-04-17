@@ -20,15 +20,26 @@ inputs:
   octopus_space:
     description: Name of the Octopus Deploy space
     required: false
-  output:
-    description: Path to the output file
+  output_path:
+    description: Path to the output directory
+    required: false
+  push_overwrite_mode:
+    description: Action to take when build information would be overwritten (FailIfExists, IgnoreIfExists, OverwriteExisting)
     required: true
-    default: buildInformation.json
+    default: FailIfExists
+  push_package_ids:
+    description: Whitespace-separated list of package IDs for which to push build information to Octopus Deploy
+    required: false
+  push_version:
+    description: Version of the packages to push
+    required: false
   version_tag_prefix:
     description: Prefix for release version tags in the repository (e.g. 'v')
     required: true
     default: v
 outputs:
+  output_file:
+    description: The full path to the build information JSON file, if one was written
   previous_release_sha:
     description: The commit SHA of the previous release
 runs:

@@ -1,28 +1,47 @@
 const core = require("@actions/core");
 const { context, GitHub } = require("@actions/github");
+const _ = require("lodash");
 const fs = require("fs").promises;
 const nodeFetch = require("node-fetch");
+const { join: joinPath } = require("path");
 const { URL } = require("url");
 
 const inputs = require("./inputs");
+const { memoizeAsync } = require("./util");
 
-async function octopusFetch(spaceId, resource, params = {}) {
+/**
+ * Make an HTTP request to the Octopus Deploy API.
+ * @param {?string} spaceId the Octopus ID of the space (e.g. 'Spaces-1')
+ * @param {string} resource the API resource path
+ * @param {object} options request options
+ * @param {string} options.method HTTP request method
+ * @param {object} options.headers HTTP request headers
+ * @param {object} [params={}] HTTP query parameters
+ * @returns {Promise<object>} de-serialized response JSON
+ */
+async function octopusRequest(spaceId, resource, options, params = {}) {
   if (!inputs.octopusApiKey) throw new Error("Missing required input: octopus_api_key");
   if (!inputs.octopusServer) throw new Error("Missing required input: octopus_server");
 
   const url = spaceId
     ? new URL(`/api/${spaceId}/${resource}`, inputs.octopusServer)
     : new URL(`/api/${resource}`, inputs.octopusServer);
-
   url.search = new URLSearchParams(params);
-  core.debug(`Octopus Deploy API request ${url}`);
 
-  const response = await nodeFetch(url, {
-    method: "GET",
-    headers: {
-      "X-Octopus-ApiKey": inputs.octopusApiKey,
+  // deep-merge defaults with passed-in options
+  const merged = _.merge(
+    {
+      method: "GET",
+      headers: {
+        "X-Octopus-ApiKey": inputs.octopusApiKey,
+      },
     },
-  });
+    options
+  );
+  core.debug(`Octopus Deploy API request ${merged.method} ${url}`);
+
+  // send the request
+  const response = await nodeFetch(url, merged);
   core.debug(
     // eslint-disable-next-line prettier/prettier
     `Octopus Deploy API response ${response.status} ${response.statusText} ${response.headers.get("content-type")}`
@@ -31,10 +50,49 @@ async function octopusFetch(spaceId, resource, params = {}) {
   throw new Error(response.statusText);
 }
 
+/**
+ * Make an HTTP GET request to the Octopus Deploy API.
+ * @param {?string} spaceId the Octopus ID of the space (e.g. 'Spaces-1')
+ * @param {string} resource the API resource path
+ * @param {object} [params={}] HTTP query parameters
+ * @returns {Promise<object>} de-serialized response JSON
+ */
+async function octopusGet(spaceId, resource, params = {}) {
+  return octopusRequest(spaceId, resource, { method: "GET" }, params);
+}
+
+/**
+ * Tests whether any of item.Name, item.Id, or item.Slug matches search.
+ * @param {object} item an Octopus Deploy API response item
+ * @param {string} search search term
+ */
 function octopusFuzzyMatch(item, search) {
   return item.Name === search || item.Id === search || item.Slug === search;
 }
 
+/**
+ * Queries the Octopus Deploy API for a space.
+ * @param {?string} spaceName the name, id, or slug of the space, or null to find the default space
+ * @returns {Promise<object>} de-serialized response JSON
+ */
+const getOctopusSpace = memoizeAsync(async (spaceName) => {
+  const payload = await octopusGet(null, "spaces");
+
+  const space = spaceName
+    ? payload.Items.find((item) => octopusFuzzyMatch(item, spaceName))
+    : payload.Items.find((item) => item.IsDefault);
+  if (!space) {
+    throw new Error(`No space named '${spaceName || "Default"}' was found`);
+  }
+
+  return space;
+});
+
+/**
+ * Discover the previous release's SHA by querying the Octopus Deploy API.
+ * @param {GitHub} github an authenticated octokit REST client
+ * @returns {Promise<string>} the SHA of the previous release, or undefined
+ */
 async function getPreviousRef(github) {
   let space;
   let project;
@@ -49,14 +107,7 @@ async function getPreviousRef(github) {
 
   // fetch the space
   try {
-    const payload = await octopusFetch(null, "spaces");
-
-    space = inputs.octopusSpace
-      ? payload.Items.find((item) => octopusFuzzyMatch(item, inputs.octopusSpace))
-      : payload.Items.find((item) => item.IsDefault);
-    if (!space) {
-      throw new Error(`No space named '${inputs.octopusSpace || "Default"}' was found`);
-    }
+    space = await getOctopusSpace(inputs.octopusSpace);
     core.info(`Detected Octopus space ${space.Name} (${space.Id})`);
   } catch (e) {
     core.warning(`Failed to fetch Octopus space: ${e.message}`);
@@ -65,7 +116,7 @@ async function getPreviousRef(github) {
 
   // fetch the Octopus project
   try {
-    const payload = await octopusFetch(space.Id, `projects`);
+    const payload = await octopusGet(space.Id, `projects`);
 
     // allow project to match name, slug, or id
     project = payload.Items.find((item) => octopusFuzzyMatch(item, inputs.octopusProject));
@@ -80,7 +131,7 @@ async function getPreviousRef(github) {
 
   // fetch the Octopus environments and find ours
   try {
-    const payload = await octopusFetch(space.Id, "environments");
+    const payload = await octopusGet(space.Id, "environments");
 
     // fall back to the last environment in the sort order
     environment =
@@ -94,7 +145,7 @@ async function getPreviousRef(github) {
 
   // fetch the most recent Octopus deployment for this project and environment
   try {
-    const payload = await octopusFetch(space.Id, "deployments", {
+    const payload = await octopusGet(space.Id, "deployments", {
       take: 1,
       projects: project.Id,
       environments: environment.Id,
@@ -154,8 +205,14 @@ async function getPreviousRef(github) {
   }
 }
 
-async function getCommits(github, previousRef) {
-  if (!previousRef) return [];
+/**
+ * Get the commits since a base commit.
+ * @param {GitHub} github an authenticated octokit REST client
+ * @param {string} base the SHA of the base commit
+ * @returns {Promise<array>} an array of commit objects
+ */
+async function getCommits(github, base) {
+  if (!base) return [];
 
   // compare commits with pagination
   let commits = [];
@@ -163,7 +220,7 @@ async function getCommits(github, previousRef) {
     const request = github.repos.compareCommits.endpoint.merge({
       owner: context.repo.owner,
       repo: context.repo.repo,
-      base: previousRef,
+      base,
       head: context.sha,
     });
     // eslint-disable-next-line no-restricted-syntax
@@ -175,6 +232,32 @@ async function getCommits(github, previousRef) {
   }
 
   return commits;
+}
+
+/**
+ * Push build information to the Octopus Deploy API.
+ * @param {string} spaceId the Octopus ID of the space (e.g. 'Spaces-1')
+ * @param {string} packageId the package ID
+ * @param {string} version the package version
+ * @param {object} buildInformation the build information
+ * @param {string} overwriteMode action to take when the build information already exists
+ * @returns {Promise<object>} the de-serialized response JSON
+ */
+async function pushBuildInformation(spaceId, packageId, version, buildInformation, overwriteMode) {
+  const payload = {
+    PackageId: packageId,
+    Version: version,
+    OctopusBuildInformation: buildInformation,
+  };
+  const options = {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+  core.info(`Pushing build information for ${packageId} version ${version}`);
+  return octopusRequest(spaceId, "build-information", options, { overwriteMode });
 }
 
 async function run() {
@@ -202,12 +285,56 @@ async function run() {
       })),
     };
 
-    // write to a file
-    const path = core.getInput("output", { required: true });
-    core.info(`Writing build information to ${path}`);
-    await fs.writeFile(path, JSON.stringify(build));
+    // create the output directory
+    let outputFile;
+    if (inputs.outputPath) {
+      core.debug(`Creating output directory '${inputs.outputPath}'`);
+      await fs.mkdir(inputs.outputPath, { recursive: true });
 
-    // output the previous commit
+      outputFile = joinPath(inputs.outputPath, "buildInformation.json");
+    }
+
+    // write to a file
+    core.info(`Writing build information to ${outputFile}`);
+    await fs.writeFile(outputFile, JSON.stringify(build));
+
+    // push build information to the server
+    if (inputs.pushPackageIds) {
+      if (!inputs.pushVersion) throw new Error("Missing required input push_version");
+      const packageIds = inputs.pushPackageIds.trim().split(/\s+/);
+      const versionRefPattern = new RegExp(`^refs/tags/(?:${inputs.versionTagPrefix})?`);
+      const version = inputs.pushVersion.trim().replace(versionRefPattern, "");
+      const writes = [];
+
+      // get the Octopus space
+      const { Id: spaceId } = await getOctopusSpace(inputs.octopusSpace);
+
+      // push build information for each package in sequence, pipeline the response writes
+      for (let i = 0; i < packageIds.length; ++i) {
+        const packageId = packageIds[i];
+
+        // eslint-disable-next-line no-await-in-loop
+        const response = await pushBuildInformation(
+          spaceId,
+          packageId,
+          version,
+          build,
+          inputs.pushOverwriteMode
+        );
+        const responsePath = joinPath(
+          inputs.outputPath,
+          `buildInformationMapped-${packageId}.json`
+        );
+
+        core.info(`Writing mapped build information response to ${responsePath}`);
+        writes.push(fs.writeFile(responsePath, JSON.stringify(response)));
+      }
+
+      await Promise.all(writes);
+    }
+
+    // outputs
+    if (outputFile) core.setOutput("output_file", outputFile);
     if (previousRef) core.setOutput("previous_release_sha", previousRef);
   } catch (e) {
     core.setFailed(e.message);

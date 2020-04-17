@@ -9,7 +9,10 @@ const mockInputs = {
   octopusEnvironment: "InputEnvironment",
   octopusProject: "InputProject",
   octopusSpace: "InputSpace",
-  output: "output.json",
+  outputPath: "octopus",
+  pushOverwriteMode: "Input",
+  pushPackageIds: "InputPackage",
+  pushVersion: "0.0.0-input.1",
   versionTagPrefix: "v",
 };
 const mockEnv = {
@@ -19,6 +22,22 @@ const mockEnv = {
   OCTOPUS_PROJECT: "EnvProject",
   OCTOPUS_SPACE: "EnvSpace",
 };
+
+function mockInputsOnce() {
+  return jest
+    .fn()
+    .mockReturnValueOnce(mockInputs.githubToken)
+    .mockReturnValueOnce(mockInputs.octopusApiKey)
+    .mockReturnValueOnce(mockInputs.octopusServer)
+    .mockReturnValueOnce(mockInputs.octopusEnvironment)
+    .mockReturnValueOnce(mockInputs.octopusProject)
+    .mockReturnValueOnce(mockInputs.octopusSpace)
+    .mockReturnValueOnce(mockInputs.outputPath)
+    .mockReturnValueOnce(mockInputs.pushOverwriteMode)
+    .mockReturnValueOnce(mockInputs.pushPackageIds)
+    .mockReturnValueOnce(mockInputs.pushVersion)
+    .mockReturnValueOnce(mockInputs.versionTagPrefix);
+}
 
 describe("inputs", () => {
   const savedEnv = { ...process.env };
@@ -31,6 +50,22 @@ describe("inputs", () => {
 
     core = require("@actions/core");
     process.env = { ...savedEnv };
+  });
+
+  test("getInput calls match action.yml", () => {
+    const fs = require("fs");
+    const yaml = require("js-yaml");
+
+    // parse the action.yml file and generate a list of the inputs expected
+    const action = yaml.safeLoad(fs.readFileSync("action.yml"));
+    const actionInputs = Object.entries(action.inputs).map(([key, value]) => {
+      const args = [key];
+      if (value.required) args.push({ required: true });
+      return args;
+    });
+
+    inputs = require("../src/inputs");
+    expect(core.getInput.mock.calls).toEqual(actionInputs);
   });
 
   describe("when missing", () => {
@@ -57,8 +92,17 @@ describe("inputs", () => {
     test("is undefined: octopusSpace", () => {
       expect(inputs.octopusSpace).toBeUndefined();
     });
-    test("is undefined: output", () => {
-      expect(inputs.output).toBeUndefined();
+    test("is undefined: outputPath", () => {
+      expect(inputs.outputPath).toBeUndefined();
+    });
+    test("is undefined: pushOverwriteMode", () => {
+      expect(inputs.pushOverwriteMode).toBeUndefined();
+    });
+    test("is undefined: pushPackageIds", () => {
+      expect(inputs.pushPackageIds).toBeUndefined();
+    });
+    test("is undefined: pushVersion", () => {
+      expect(inputs.pushVersion).toBeUndefined();
     });
     test("is undefined: versionTagPrefix", () => {
       expect(inputs.versionTagPrefix).toBeUndefined();
@@ -90,8 +134,17 @@ describe("inputs", () => {
     test("is undefined: githubToken", () => {
       expect(inputs.githubToken).toBeUndefined();
     });
-    test("is undefined: output", () => {
-      expect(inputs.output).toBeUndefined();
+    test("is undefined: outputPath", () => {
+      expect(inputs.outputPath).toBeUndefined();
+    });
+    test("is undefined: pushOverwriteMode", () => {
+      expect(inputs.pushOverwriteMode).toBeUndefined();
+    });
+    test("is undefined: pushPackageIds", () => {
+      expect(inputs.pushPackageIds).toBeUndefined();
+    });
+    test("is undefined: pushVersion", () => {
+      expect(inputs.pushVersion).toBeUndefined();
     });
     test("is undefined: versionTagPrefix", () => {
       expect(inputs.versionTagPrefix).toBeUndefined();
@@ -100,31 +153,10 @@ describe("inputs", () => {
 
   describe("when input is provided", () => {
     beforeEach(() => {
-      core.getInput = jest
-        .fn()
-        .mockReturnValueOnce(mockInputs.githubToken)
-        .mockReturnValueOnce(mockInputs.octopusApiKey)
-        .mockReturnValueOnce(mockInputs.octopusServer)
-        .mockReturnValueOnce(mockInputs.octopusEnvironment)
-        .mockReturnValueOnce(mockInputs.octopusProject)
-        .mockReturnValueOnce(mockInputs.octopusSpace)
-        .mockReturnValueOnce(mockInputs.output)
-        .mockReturnValueOnce(mockInputs.versionTagPrefix);
+      core.getInput = mockInputsOnce();
       inputs = require("../src/inputs");
     });
 
-    test("getInput called with expected args", () => {
-      expect(core.getInput.mock.calls).toEqual([
-        ["github_token", { required: true }],
-        ["octopus_api_key"],
-        ["octopus_server"],
-        ["octopus_environment"],
-        ["octopus_project"],
-        ["octopus_space"],
-        ["output", { required: true }],
-        ["version_tag_prefix", { required: true }],
-      ]);
-    });
     test("has input value: githubToken", () => {
       expect(inputs.githubToken).toStrictEqual(mockInputs.githubToken);
     });
@@ -143,8 +175,17 @@ describe("inputs", () => {
     test("has input value: octopusSpace", () => {
       expect(inputs.octopusSpace).toStrictEqual(mockInputs.octopusSpace);
     });
-    test("has input value: output", () => {
-      expect(inputs.output).toStrictEqual(mockInputs.output);
+    test("has input value: outputPath", () => {
+      expect(inputs.outputPath).toStrictEqual(mockInputs.outputPath);
+    });
+    test("has input value: pushOverwriteMode", () => {
+      expect(inputs.pushOverwriteMode).toStrictEqual(mockInputs.pushOverwriteMode);
+    });
+    test("has input value: pushPackageIds", () => {
+      expect(inputs.pushPackageIds).toStrictEqual(mockInputs.pushPackageIds);
+    });
+    test("has input value: pushVersion", () => {
+      expect(inputs.pushVersion).toStrictEqual(mockInputs.pushVersion);
     });
     test("has input value: versionTagPrefix", () => {
       expect(inputs.versionTagPrefix).toStrictEqual(mockInputs.versionTagPrefix);
@@ -153,20 +194,14 @@ describe("inputs", () => {
 
   describe("when input and env are provided", () => {
     beforeEach(() => {
-      core.getInput = jest
-        .fn()
-        .mockReturnValueOnce(mockInputs.githubToken)
-        .mockReturnValueOnce(mockInputs.octopusApiKey)
-        .mockReturnValueOnce(mockInputs.octopusServer)
-        .mockReturnValueOnce(mockInputs.octopusEnvironment)
-        .mockReturnValueOnce(mockInputs.octopusProject)
-        .mockReturnValueOnce(mockInputs.octopusSpace)
-        .mockReturnValueOnce(mockInputs.output)
-        .mockReturnValueOnce(mockInputs.versionTagPrefix);
+      core.getInput = mockInputsOnce();
       ({ ...process.env } = mockEnv);
       inputs = require("../src/inputs");
     });
 
+    test("has input value: githubToken", () => {
+      expect(inputs.githubToken).toStrictEqual(mockInputs.githubToken);
+    });
     test("has input value: octopusApiKey", () => {
       expect(inputs.octopusApiKey).toStrictEqual(mockInputs.octopusApiKey);
     });
@@ -181,6 +216,21 @@ describe("inputs", () => {
     });
     test("has input value: octopusSpace", () => {
       expect(inputs.octopusSpace).toStrictEqual(mockInputs.octopusSpace);
+    });
+    test("has input value: outputPath", () => {
+      expect(inputs.outputPath).toStrictEqual(mockInputs.outputPath);
+    });
+    test("has input value: pushOverwriteMode", () => {
+      expect(inputs.pushOverwriteMode).toStrictEqual(mockInputs.pushOverwriteMode);
+    });
+    test("has input value: pushPackageIds", () => {
+      expect(inputs.pushPackageIds).toStrictEqual(mockInputs.pushPackageIds);
+    });
+    test("has input value: pushVersion", () => {
+      expect(inputs.pushVersion).toStrictEqual(mockInputs.pushVersion);
+    });
+    test("has input value: versionTagPrefix", () => {
+      expect(inputs.versionTagPrefix).toStrictEqual(mockInputs.versionTagPrefix);
     });
   });
 });

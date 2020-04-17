@@ -10,7 +10,10 @@ const inputs = defaults(
     octopusEnvironment: core.getInput("octopus_environment"),
     octopusProject: core.getInput("octopus_project"),
     octopusSpace: core.getInput("octopus_space"),
-    output: core.getInput("output", { required: true }),
+    outputPath: core.getInput("output_path"),
+    pushOverwriteMode: core.getInput("push_overwrite_mode", { required: true }),
+    pushPackageIds: core.getInput("push_package_ids"),
+    pushVersion: core.getInput("push_version"),
     versionTagPrefix: core.getInput("version_tag_prefix", { required: true }),
   }),
   // use environment variables as a fallback

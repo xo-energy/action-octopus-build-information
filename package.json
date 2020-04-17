@@ -4,7 +4,10 @@
   "description": "GitHub Action that generates build information for Octopus Deploy",
   "main": "dist/index.js",
   "scripts": {
+    "prebuild": "npm run lint && npm run test && npm run clean",
     "build": "ncc build src/main.js -m",
+    "debug": "node -r dotenv/config src/main.js",
+    "clean": "shx rm -rf dist/*",
     "lint": "eslint . --cache --fix",
     "test": "jest"
   },
@@ -23,13 +26,13 @@
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-jest": "^23.8.2",
-    "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.1.3",
-    "eslint-plugin-promise": "^4.2.1",
     "husky": "^4.2.5",
     "jest": "^25.3.0",
+    "js-yaml": "^3.13.1",
     "lint-staged": "^10.1.3",
-    "prettier": "^2.0.4"
+    "prettier": "^2.0.4",
+    "shx": "^0.3.2"
   },
   "jest": {
     "testEnvironment": "node"

@@ -17,6 +17,12 @@
     "ecmaVersion": 2019
   },
   "rules": {
+    "no-plusplus": [
+      "error",
+      {
+        "allowForLoopAfterthoughts": true
+      }
+    ],
     "prettier/prettier": [
       "warn",
       {
