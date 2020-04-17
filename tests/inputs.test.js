@@ -50,6 +50,9 @@ describe("inputs", () => {
 
     core = require("@actions/core");
     process.env = { ...savedEnv };
+
+    // ensure our test enviornment variables don't leak from the host environment
+    Object.keys(mockEnv).forEach((key) => delete process.env[key]);
   });
 
   test("getInput calls match action.yml", () => {
