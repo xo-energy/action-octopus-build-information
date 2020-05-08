@@ -295,8 +295,10 @@ async function run() {
     }
 
     // write to a file
-    core.info(`Writing build information to ${outputFile}`);
-    await fs.writeFile(outputFile, JSON.stringify(build));
+    if (outputFile) {
+      core.info(`Writing build information to ${outputFile}`);
+      await fs.writeFile(outputFile, JSON.stringify(build));
+    }
 
     // push build information to the server
     if (inputs.pushPackageIds) {
@@ -321,13 +323,17 @@ async function run() {
           build,
           inputs.pushOverwriteMode
         );
-        const responsePath = joinPath(
-          inputs.outputPath,
-          `buildInformationMapped-${packageId}.json`
-        );
 
-        core.info(`Writing mapped build information response to ${responsePath}`);
-        writes.push(fs.writeFile(responsePath, JSON.stringify(response)));
+        // write response to a file
+        if (inputs.outputPath) {
+          const responsePath = joinPath(
+            inputs.outputPath,
+            `buildInformationMapped-${packageId}.json`
+          );
+
+          core.info(`Writing mapped build information response to ${responsePath}`);
+          writes.push(fs.writeFile(responsePath, JSON.stringify(response)));
+        }
       }
 
       await Promise.all(writes);
