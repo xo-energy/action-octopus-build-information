@@ -1,6 +1,6 @@
 const core = require("@actions/core");
 const { context, GitHub } = require("@actions/github");
-const _ = require("lodash");
+const fp = require("lodash/fp");
 const fs = require("fs").promises;
 const nodeFetch = require("node-fetch");
 const { join: joinPath } = require("path");
@@ -29,7 +29,7 @@ async function octopusRequest(spaceId, resource, options, params = {}) {
   url.search = new URLSearchParams(params);
 
   // deep-merge defaults with passed-in options
-  const merged = _.merge(
+  const merged = fp.merge(
     {
       method: "GET",
       headers: {
@@ -170,19 +170,36 @@ async function getPreviousRef(github) {
     return undefined;
   }
 
-  // take the first one and the first BuildInformation if there is one
-  const changes = deployment.Changes[0];
-  if (changes.BuildInformation.length > 0) {
-    const build = changes.BuildInformation[0];
+  // find a BuildInformation object matching one of our push packages
+  const buildInformationSequence = fp.flatMap(
+    (x) => x.BuildInformation,
+    fp.reverse(deployment.Changes)
+  );
+  const buildInformationForPackage = fp.head(
+    fp.filter(
+      (x) => x.VcsCommitNumber && inputs.pushPackageIds.includes(x.PackageId),
+      buildInformationSequence
+    )
+  );
 
-    if (build.VcsCommitNumber) {
-      core.info(`Detected previous build @ ${build.VcsCommitNumber}`);
-      return build.VcsCommitNumber;
-    }
+  // use that one, if we found one, or if not look for any
+  const buildInformation =
+    buildInformationForPackage ||
+    fp.head(fp.filter((x) => x.VcsCommitNumber, buildInformationSequence));
+
+  // success! use this commit as the previous version
+  if (buildInformation) {
+    core.info(`Detected previous build @ ${buildInformation.VcsCommitNumber}`);
+    return buildInformation.VcsCommitNumber;
   }
 
-  // use the version number to probe for a matching ref
-  const version = changes.Version;
+  // try using the last version number (changes appear to be in sequential order)
+  const version = fp.last(
+    fp.filter(
+      fp.identity,
+      fp.map((x) => x.Version, deployment.Changes)
+    )
+  );
   if (!version) {
     core.warning("Deployment does not contain any build information");
     return undefined;
@@ -301,9 +318,8 @@ async function run() {
     }
 
     // push build information to the server
-    if (inputs.pushPackageIds) {
+    if (inputs.pushPackageIds.length > 0) {
       if (!inputs.pushVersion) throw new Error("Missing required input push_version");
-      const packageIds = inputs.pushPackageIds.trim().split(/\s+/);
       const versionRefPattern = new RegExp(`^refs/tags/(?:${inputs.versionTagPrefix})?`);
       const version = inputs.pushVersion.trim().replace(versionRefPattern, "");
       const writes = [];
@@ -312,8 +328,8 @@ async function run() {
       const { Id: spaceId } = await getOctopusSpace(inputs.octopusSpace);
 
       // push build information for each package in sequence, pipeline the response writes
-      for (let i = 0; i < packageIds.length; ++i) {
-        const packageId = packageIds[i];
+      for (let i = 0; i < inputs.pushPackageIds.length; ++i) {
+        const packageId = inputs.pushPackageIds[i];
 
         // eslint-disable-next-line no-await-in-loop
         const response = await pushBuildInformation(

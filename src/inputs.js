@@ -1,9 +1,9 @@
 const core = require("@actions/core");
-const { defaults, pickBy } = require("lodash");
+const { defaultsAll, filter, identity, pickBy } = require("lodash/fp");
 
-const inputs = defaults(
+const inputs = defaultsAll([
   // use specific inputs when set
-  pickBy({
+  pickBy(identity, {
     githubToken: core.getInput("github_token", { required: true }),
     octopusApiKey: core.getInput("octopus_api_key"),
     octopusServer: core.getInput("octopus_server"),
@@ -12,12 +12,12 @@ const inputs = defaults(
     octopusSpace: core.getInput("octopus_space"),
     outputPath: core.getInput("output_path"),
     pushOverwriteMode: core.getInput("push_overwrite_mode", { required: true }),
-    pushPackageIds: core.getInput("push_package_ids"),
+    pushPackageIds: filter(identity, (core.getInput("push_package_ids") || "").trim().split(/\s+/)),
     pushVersion: core.getInput("push_version"),
     versionTagPrefix: core.getInput("version_tag_prefix", { required: true }),
   }),
   // use environment variables as a fallback
-  pickBy({
+  pickBy(identity, {
     octopusApiKey: process.env.OCTOPUS_CLI_API_KEY,
     octopusServer: process.env.OCTOPUS_CLI_SERVER,
     octopusEnvironment: process.env.OCTOPUS_ENVIRONMENT,
@@ -27,7 +27,7 @@ const inputs = defaults(
   // use these explicit defaults
   {
     octopusEnvironment: "Production",
-  }
-);
+  },
+]);
 
 module.exports = inputs;

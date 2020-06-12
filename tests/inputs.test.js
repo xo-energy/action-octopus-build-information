@@ -101,8 +101,8 @@ describe("inputs", () => {
     test("is undefined: pushOverwriteMode", () => {
       expect(inputs.pushOverwriteMode).toBeUndefined();
     });
-    test("is undefined: pushPackageIds", () => {
-      expect(inputs.pushPackageIds).toBeUndefined();
+    test("is empty: pushPackageIds", () => {
+      expect(inputs.pushPackageIds).toEqual([]);
     });
     test("is undefined: pushVersion", () => {
       expect(inputs.pushVersion).toBeUndefined();
@@ -143,8 +143,8 @@ describe("inputs", () => {
     test("is undefined: pushOverwriteMode", () => {
       expect(inputs.pushOverwriteMode).toBeUndefined();
     });
-    test("is undefined: pushPackageIds", () => {
-      expect(inputs.pushPackageIds).toBeUndefined();
+    test("is empty: pushPackageIds", () => {
+      expect(inputs.pushPackageIds).toEqual([]);
     });
     test("is undefined: pushVersion", () => {
       expect(inputs.pushVersion).toBeUndefined();
@@ -185,7 +185,7 @@ describe("inputs", () => {
       expect(inputs.pushOverwriteMode).toStrictEqual(mockInputs.pushOverwriteMode);
     });
     test("has input value: pushPackageIds", () => {
-      expect(inputs.pushPackageIds).toStrictEqual(mockInputs.pushPackageIds);
+      expect(inputs.pushPackageIds).toStrictEqual([mockInputs.pushPackageIds]);
     });
     test("has input value: pushVersion", () => {
       expect(inputs.pushVersion).toStrictEqual(mockInputs.pushVersion);
@@ -227,7 +227,7 @@ describe("inputs", () => {
       expect(inputs.pushOverwriteMode).toStrictEqual(mockInputs.pushOverwriteMode);
     });
     test("has input value: pushPackageIds", () => {
-      expect(inputs.pushPackageIds).toStrictEqual(mockInputs.pushPackageIds);
+      expect(inputs.pushPackageIds).toStrictEqual([mockInputs.pushPackageIds]);
     });
     test("has input value: pushVersion", () => {
       expect(inputs.pushVersion).toStrictEqual(mockInputs.pushVersion);
