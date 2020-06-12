@@ -342,9 +342,10 @@ async function run() {
 
         // write response to a file
         if (inputs.outputPath) {
+          const packageIdSanitized = packageId.replace(/[^\w.-]+/g, "_");
           const responsePath = joinPath(
             inputs.outputPath,
-            `buildInformationMapped-${packageId}.json`
+            `buildInformationMapped-${packageIdSanitized}.json`
           );
 
           core.info(`Writing mapped build information response to ${responsePath}`);
