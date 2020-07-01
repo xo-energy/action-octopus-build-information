@@ -76,11 +76,11 @@ function octopusFuzzyMatch(item, search) {
  * @returns {Promise<object>} de-serialized response JSON
  */
 const getOctopusSpace = memoizeAsync(async (spaceName) => {
-  const payload = await octopusGet(null, "spaces");
+  const payload = await octopusGet(null, "spaces/all");
 
   const space = spaceName
-    ? payload.Items.find((item) => octopusFuzzyMatch(item, spaceName))
-    : payload.Items.find((item) => item.IsDefault);
+    ? payload.find((item) => octopusFuzzyMatch(item, spaceName))
+    : payload.find((item) => item.IsDefault);
   if (!space) {
     throw new Error(`No space named '${spaceName || "Default"}' was found`);
   }
@@ -116,10 +116,10 @@ async function getPreviousRef(github) {
 
   // fetch the Octopus project
   try {
-    const payload = await octopusGet(space.Id, `projects`);
+    const payload = await octopusGet(space.Id, `projects/all`);
 
     // allow project to match name, slug, or id
-    project = payload.Items.find((item) => octopusFuzzyMatch(item, inputs.octopusProject));
+    project = payload.find((item) => octopusFuzzyMatch(item, inputs.octopusProject));
     if (!project) {
       throw new Error(`No project named '${inputs.octopusProject}' was found`);
     }
@@ -131,12 +131,12 @@ async function getPreviousRef(github) {
 
   // fetch the Octopus environments and find ours
   try {
-    const payload = await octopusGet(space.Id, "environments");
+    const payload = await octopusGet(space.Id, "environments/all");
 
     // fall back to the last environment in the sort order
     environment =
-      payload.Items.find((item) => octopusFuzzyMatch(item, inputs.octopusEnvironment)) ||
-      payload.Items[payload.Items.length - 1];
+      payload.find((item) => octopusFuzzyMatch(item, inputs.octopusEnvironment)) ||
+      payload[payload.length - 1];
     core.info(`Detected Octopus environment ${environment.Name} (${environment.Id})`);
   } catch (e) {
     core.warning(`Failed to fetch Octopus environments: ${e.message}`);
