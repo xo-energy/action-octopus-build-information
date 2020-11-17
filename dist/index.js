@@ -6893,7 +6893,7 @@ module.exports = inputs;
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
 const core = __webpack_require__(2186);
-const { context, GitHub } = __webpack_require__(5438);
+const { context, getOctokit } = __webpack_require__(5438);
 const fp = __webpack_require__(4542);
 const fs = __webpack_require__(5747).promises;
 const nodeFetch = __webpack_require__(467);
@@ -6984,7 +6984,7 @@ const getOctopusSpace = memoizeAsync(async (spaceName) => {
 
 /**
  * Discover the previous release's SHA by querying the Octopus Deploy API.
- * @param {GitHub} github an authenticated octokit REST client
+ * @param {Octokit} github an authenticated octokit REST client
  * @returns {Promise<string>} the SHA of the previous release, or undefined
  */
 async function getPreviousRef(github) {
@@ -7118,7 +7118,7 @@ async function getPreviousRef(github) {
 
 /**
  * Get the commits since a base commit.
- * @param {GitHub} github an authenticated octokit REST client
+ * @param {Octokit} github an authenticated octokit REST client
  * @param {string} base the SHA of the base commit
  * @returns {Promise<array>} an array of commit objects
  */
@@ -7173,7 +7173,7 @@ async function pushBuildInformation(spaceId, packageId, version, buildInformatio
 
 async function run() {
   try {
-    const github = new GitHub(inputs.githubToken);
+    const github = getOctokit(inputs.githubToken);
     const previousRef = await getPreviousRef(github);
 
     // compare the previous release to the current tag

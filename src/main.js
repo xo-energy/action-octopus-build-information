@@ -1,5 +1,5 @@
 const core = require("@actions/core");
-const { context, GitHub } = require("@actions/github");
+const { context, getOctokit } = require("@actions/github");
 const fp = require("lodash/fp");
 const fs = require("fs").promises;
 const nodeFetch = require("node-fetch");
@@ -90,7 +90,7 @@ const getOctopusSpace = memoizeAsync(async (spaceName) => {
 
 /**
  * Discover the previous release's SHA by querying the Octopus Deploy API.
- * @param {GitHub} github an authenticated octokit REST client
+ * @param {Octokit} github an authenticated octokit REST client
  * @returns {Promise<string>} the SHA of the previous release, or undefined
  */
 async function getPreviousRef(github) {
@@ -224,7 +224,7 @@ async function getPreviousRef(github) {
 
 /**
  * Get the commits since a base commit.
- * @param {GitHub} github an authenticated octokit REST client
+ * @param {Octokit} github an authenticated octokit REST client
  * @param {string} base the SHA of the base commit
  * @returns {Promise<array>} an array of commit objects
  */
@@ -279,7 +279,7 @@ async function pushBuildInformation(spaceId, packageId, version, buildInformatio
 
 async function run() {
   try {
-    const github = new GitHub(inputs.githubToken);
+    const github = getOctokit(inputs.githubToken);
     const previousRef = await getPreviousRef(github);
 
     // compare the previous release to the current tag
