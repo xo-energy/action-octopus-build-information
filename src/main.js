@@ -286,7 +286,7 @@ async function run() {
     const commits = await getCommits(github, previousRef);
     core.info(`Collected ${commits.length} commits`);
 
-    let branch = "";
+    let branch = null;
     if (context.ref.startsWith("refs/heads/")) {
       branch = context.ref.replace("refs/heads/", "");
     }
