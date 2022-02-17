@@ -11,6 +11,7 @@ All inputs are optional (or have reasonable default values). However, without in
 - `github_token`: GitHub personal access token. Used get commit history from the repository. Defaults to the token provided by the workflow run.
 - `octopus_api_key`: Authentication key for the Octopus Deploy API. Can also be set via the environment variable `OCTOPUS_CLI_API_KEY`.
 - `octopus_server`: URL of the Octopus Deploy server. Can also be set via the environment variable `OCTOPUS_CLI_SERVER`.
+- `octopus_query_string`: Query String to send to the Octopus Deploy Server. E.g., `take=50`. [REST API Documentation via Swagger](https://demo.octopus.app/swaggerui/index.html).
 - `octopus_environment`: Use the previous release deployed to this environment to generate commit history. Defaults to "Production" or, if there is no such environment, to the last environment in the space. Can also be set via the environment variable `OCTOPUS_ENVIRONMENT`.
 - `octopus_project`: Name of the Octopus Deploy project to query for the previous deployment. Omit to skip querying Octopus Deploy and generating commit history. Can also be set via the environment variable `OCTOPUS_PROJECT`.
 - `octopus_space`: Name of the Octopus Deploy space that contains `octopus_project`. Defaults to the default space. Can also be set via the environment variable `OCTOPUS_SPACE`.
