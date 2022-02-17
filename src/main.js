@@ -116,7 +116,8 @@ async function getPreviousRef(github) {
 
   // fetch the Octopus project
   try {
-    const payload = await octopusGet(space.Id, `projects/all`);
+    const params = Object.fromEntries(new URLSearchParams(inputs.octopusQueryString));
+    const payload = await octopusGet(space.Id, `projects/all`, params);
 
     // allow project to match name, slug, or id
     project = payload.find((item) => octopusFuzzyMatch(item, inputs.octopusProject));

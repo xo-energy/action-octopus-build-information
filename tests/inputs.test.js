@@ -6,6 +6,7 @@ const mockInputs = {
   githubToken: "inputtoken",
   octopusApiKey: "API-input",
   octopusServer: "https://input/",
+  octopusQueryString: "take=50",
   octopusEnvironment: "InputEnvironment",
   octopusProject: "InputProject",
   octopusSpace: "InputSpace",
@@ -29,6 +30,7 @@ function mockInputsOnce() {
     .mockReturnValueOnce(mockInputs.githubToken)
     .mockReturnValueOnce(mockInputs.octopusApiKey)
     .mockReturnValueOnce(mockInputs.octopusServer)
+    .mockReturnValueOnce(mockInputs.octopusQueryString)
     .mockReturnValueOnce(mockInputs.octopusEnvironment)
     .mockReturnValueOnce(mockInputs.octopusProject)
     .mockReturnValueOnce(mockInputs.octopusSpace)
@@ -88,6 +90,9 @@ describe("inputs", () => {
     });
     test("is undefined: octopusServer", () => {
       expect(inputs.octopusServer).toBeUndefined();
+    });
+    test("is undefined: octopusQueryString", () => {
+      expect(inputs.octopusQueryString).toBeUndefined();
     });
     test("is undefined: octopusProject", () => {
       expect(inputs.octopusProject).toBeUndefined();

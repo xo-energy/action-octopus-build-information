@@ -11,6 +11,9 @@ inputs:
   octopus_server:
     description: URL of the Octopus Deploy server
     required: false
+  octopus_query_string:
+    description: URL Query string
+    required: false
   octopus_environment:
     description: Name of the Octopus Deploy environment
     required: false

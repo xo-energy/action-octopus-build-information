@@ -6861,6 +6861,7 @@ const inputs = defaultsAll([
     githubToken: core.getInput("github_token", { required: true }),
     octopusApiKey: core.getInput("octopus_api_key"),
     octopusServer: core.getInput("octopus_server"),
+    octopusQueryString: core.getInput("octopus_query_string"),
     octopusEnvironment: core.getInput("octopus_environment"),
     octopusProject: core.getInput("octopus_project"),
     octopusSpace: core.getInput("octopus_space"),
@@ -7010,7 +7011,8 @@ async function getPreviousRef(github) {
 
   // fetch the Octopus project
   try {
-    const payload = await octopusGet(space.Id, `projects/all`);
+    const params = Object.fromEntries(new URLSearchParams(inputs.octopusQueryString));
+    const payload = await octopusGet(space.Id, `projects/all`, params);
 
     // allow project to match name, slug, or id
     project = payload.find((item) => octopusFuzzyMatch(item, inputs.octopusProject));
