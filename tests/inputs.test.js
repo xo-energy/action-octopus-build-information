@@ -174,6 +174,9 @@ describe("inputs", () => {
     test("has input value: octopusServer", () => {
       expect(inputs.octopusServer).toStrictEqual(mockInputs.octopusServer);
     });
+    test("has input value: octopusQueryString", () => {
+      expect(inputs.octopusQueryString).toStrictEqual(mockInputs.octopusQueryString);
+    });
     test("has input value: octopusEnvironment", () => {
       expect(inputs.octopusEnvironment).toStrictEqual(mockInputs.octopusEnvironment);
     });
