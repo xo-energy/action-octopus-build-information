@@ -4,7 +4,6 @@
   "description": "GitHub Action that generates build information for Octopus Deploy",
   "main": "dist/index.js",
   "scripts": {
-    "prebuild": "npm run lint && npm run test && npm run clean",
     "build": "ncc build src/main.js -s",
     "debug": "node -r dotenv/config src/main.js",
     "clean": "shx rm -rf dist/*",

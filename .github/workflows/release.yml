@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node_version: 16
+      
+      # we don't need to build or run nbgv because the tag was already built
+      - uses: actions/checkout@v3
+
+      # move the tracking tags to the release tag
+      - run: |
+          VERSION=${GITHUB_REF:refs/tags/v}
+          MAJOR=$(node -p "require('semver').major('$VERSION')")
+          MINOR=$(node -p "require('semver').minor('$VERSION')")
+          git tag -f "v$MAJOR"
+          git tag -f "v$MAJOR.$MINOR"
+
+      # push and overwrite the tracking tags
+      - run: git push --force origin "refs/tags/v$MAJOR" "refs/tags/v$MAJOR.$MINOR"

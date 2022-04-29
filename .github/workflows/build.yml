@@ -1,0 +1,40 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - 'release-*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node_version: 16
+      
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: dotnet/nbgv@master
+        id: nbgv
+        with:
+          stamp: package.json
+      
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+      # this makes it possible to commit
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      
+      # force-add the ignored 'dist' folder, amend HEAD, and tag it with the version number
+      - run: |
+          git add -f dist
+          git commit --amend -C HEAD
+          git tag 'v${{ steps.nbgv.outputs.SemVer2 }}'
+
+      # push ONLY the tag, so the original commit remains w/o the 'dist' folder
+      - run: git push origin 'refs/tags/v${{ steps.nbgv.outputs.SemVer2 }}'
