@@ -18,7 +18,7 @@
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {
-    "@vercel/ncc": "0.25.0",
+    "@vercel/ncc": "^0.33.4",
     "dotenv": "^8.6.0",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
