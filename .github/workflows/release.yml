@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v3
         with:
-          node_version: 16
+          node-version: 16
       
       # we don't need to build or run nbgv because the tag was already built
       - uses: actions/checkout@v3
