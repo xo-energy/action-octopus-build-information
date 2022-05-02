@@ -286,6 +286,12 @@ async function run() {
     const commits = await getCommits(github, previousRef);
     core.info(`Collected ${commits.length} commits`);
 
+    // detect branch name
+    let branch = null;
+    if (context.ref.startsWith("refs/heads/")) {
+      branch = context.ref.substring("refs/heads/".length);
+    }
+
     // construct build information
     const repoUri = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
     const runId = process.env.GITHUB_RUN_ID;
@@ -293,6 +299,7 @@ async function run() {
       BuildEnvironment: "GitHub Actions",
       BuildNumber: runId.toString(),
       BuildUrl: `${repoUri}/actions/runs/${runId}`,
+      Branch: branch,
       VcsType: "Git",
       VcsRoot: `${repoUri}.git`,
       VcsCommitNumber: context.sha,

@@ -91,7 +91,7 @@ jobs:
   "BuildEnvironment": "GitHub Actions",
   "BuildNumber": "12345",
   "BuildUrl": "https://github.com/owner/MyProject/actions/runs/12345",
-  "Branch": null,
+  "Branch": "main",
   "VcsType": "Git",
   "VcsRoot": "https://github.com/owner/MyProject.git",
   "VcsCommitNumber": "579233b2c479241523cba5e3af55d0f50f2d6414",
