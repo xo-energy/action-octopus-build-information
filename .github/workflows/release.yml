@@ -22,6 +22,4 @@ jobs:
           MINOR=$(.github/semver get minor $VERSION)
           git tag -f "v$MAJOR"
           git tag -f "v$MAJOR.$MINOR"
-
-      # push and overwrite the tracking tags
-      - run: git push --force origin "refs/tags/v$MAJOR" "refs/tags/v$MAJOR.$MINOR"
+          git push --force origin "refs/tags/v$MAJOR" "refs/tags/v$MAJOR.$MINOR"
