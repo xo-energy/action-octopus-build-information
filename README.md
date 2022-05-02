@@ -4,6 +4,8 @@ This GitHub Action (written in JavaScript) generates a JSON build information fi
 
 ## Usage
 
+This repository uses automation to compile and tag releases. Only **tagged releases** contain the compiled `dist` folder required to run the action. Reference the action in your workflow using floating version tags, like `v1` or `v1.1`. These tags are updated every time a GitHub Release is published.
+
 ### Inputs
 
 All inputs are optional (or have reasonable default values). However, without inputs, the action does nothing. Enable features by providing the appropriate input. Also, an `octopus_api_key` and `octopus_server` URL are required when either `octopus_project` or `push_package_ids` is set, and `push_version` is required when `push_package_ids` is set.
@@ -44,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Generate Octopus Deploy build information
-        uses: xo-energy/action-octopus-build-information@v1.0.0
+        uses: xo-energy/action-octopus-build-information@v1
         with:
           octopus_api_key: ${{ secrets.OCTOPUS_CLI_API_KEY }}
           octopus_server: ${{ secrets.OCTOPUS_CLI_SERVER }}
