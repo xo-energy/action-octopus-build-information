@@ -18,8 +18,8 @@ jobs:
       # move the tracking tags to the release tag
       - run: |
           VERSION=${GITHUB_REF:refs/tags/v}
-          MAJOR=$(node -p "require('semver').major('$VERSION')")
-          MINOR=$(node -p "require('semver').minor('$VERSION')")
+          MAJOR=$(.github/semver get major $VERSION)
+          MINOR=$(.github/semver get minor $VERSION)
           git tag -f "v$MAJOR"
           git tag -f "v$MAJOR.$MINOR"
 
