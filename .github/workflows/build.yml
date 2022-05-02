@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'release-*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,11 +25,6 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-
-      # this makes it possible to commit
-      - run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
       
       # force-add the ignored 'dist' folder, amend HEAD, and tag it with the version number
       - run: |
