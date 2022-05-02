@@ -60,7 +60,7 @@ describe("inputs", () => {
     const yaml = require("js-yaml");
 
     // parse the action.yml file and generate a list of the inputs expected
-    const action = yaml.safeLoad(fs.readFileSync("action.yml"));
+    const action = yaml.load(fs.readFileSync("action.yml"));
     const actionInputs = Object.entries(action.inputs).map(([key, value]) => {
       const args = [key];
       if (value.required) args.push({ required: true });

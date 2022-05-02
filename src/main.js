@@ -90,7 +90,7 @@ const getOctopusSpace = memoizeAsync(async (spaceName) => {
 
 /**
  * Discover the previous release's SHA by querying the Octopus Deploy API.
- * @param {Octokit} github an authenticated octokit REST client
+ * @param {GitHub} github an authenticated octokit REST client
  * @returns {Promise<string>} the SHA of the previous release, or undefined
  */
 async function getPreviousRef(github) {
@@ -209,7 +209,7 @@ async function getPreviousRef(github) {
   core.info(`Detected previous version ${version}, looking for a matching tag...`);
   try {
     const tag = `${inputs.versionTagPrefix}${version}`;
-    const response = await github.git.getRef({
+    const response = await github.rest.git.getRef({
       owner: context.repo.owner,
       repo: context.repo.repo,
       ref: `tags/${tag}`,
@@ -224,7 +224,7 @@ async function getPreviousRef(github) {
 
 /**
  * Get the commits since a base commit.
- * @param {Octokit} github an authenticated octokit REST client
+ * @param {GitHub} github an authenticated octokit REST client
  * @param {string} base the SHA of the base commit
  * @returns {Promise<array>} an array of commit objects
  */
@@ -234,7 +234,7 @@ async function getCommits(github, base) {
   // compare commits with pagination
   let commits = [];
   try {
-    const request = github.repos.compareCommits.endpoint.merge({
+    const request = github.rest.repos.compareCommits.endpoint.merge({
       owner: context.repo.owner,
       repo: context.repo.repo,
       base,
