@@ -166,7 +166,7 @@ async function run() {
 
     // detect branch name
     let branch = null;
-    if (context.ref.startsWith("refs/heads/")) {
+    if (typeof context.ref === "string" && context.ref.startsWith("refs/heads/")) {
       branch = context.ref.substring("refs/heads/".length);
     }
 
