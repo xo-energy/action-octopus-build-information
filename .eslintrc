@@ -24,10 +24,7 @@
       }
     ],
     "prettier/prettier": [
-      "warn",
-      {
-        "printWidth": 100
-      }
+      "warn"
     ],
     "prefer-destructuring": "off"
   }

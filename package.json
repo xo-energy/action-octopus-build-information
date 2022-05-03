@@ -39,5 +39,8 @@
   "lint-staged": {
     "src/**/*.js": "eslint --cache --fix",
     "tests/**/*.js": "eslint --cache --fix"
+  },
+  "prettier": {
+    "printWidth": 100
   }
 }
