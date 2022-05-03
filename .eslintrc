@@ -14,7 +14,7 @@
     "node": true
   },
   "parserOptions": {
-    "ecmaVersion": 2019
+    "ecmaVersion": 2022
   },
   "rules": {
     "no-plusplus": [
