@@ -22,7 +22,6 @@
     "@vercel/ncc": "^0.33.4",
     "dotenv": "^16.0.0",
     "eslint": "^8.14.0",
-    "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jest": "^26.1.5",
