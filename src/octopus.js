@@ -11,6 +11,9 @@ const { memoizeAsync } = require("./util");
  * @param {string} search search term
  */
 function octopusFuzzyMatch(item, search) {
+  if (!search) {
+    return false;
+  }
   return item.Name === search || item.Id === search || item.Slug === search;
 }
 
