@@ -194,10 +194,10 @@ class OctopusClient {
    */
   async getSpace(spaceName) {
     for await (const item of this.getResourceCollection(null, "spaces")) {
-      if (spaceName === null && item.IsDefault) {
+      if (item.IsDefault && !spaceName) {
         return item;
       }
-      if (spaceName !== null && octopusFuzzyMatch(item, spaceName)) {
+      if (octopusFuzzyMatch(item, spaceName)) {
         return item;
       }
     }
