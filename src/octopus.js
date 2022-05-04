@@ -11,6 +11,9 @@ const { memoizeAsync } = require("./util");
  * @param {string} search search term
  */
 function octopusFuzzyMatch(item, search) {
+  if (!search) {
+    return false;
+  }
   return item.Name === search || item.Id === search || item.Slug === search;
 }
 
@@ -194,10 +197,10 @@ class OctopusClient {
    */
   async getSpace(spaceName) {
     for await (const item of this.getResourceCollection(null, "spaces")) {
-      if (spaceName === null && item.IsDefault) {
+      if (item.IsDefault && !spaceName) {
         return item;
       }
-      if (spaceName !== null && octopusFuzzyMatch(item, spaceName)) {
+      if (octopusFuzzyMatch(item, spaceName)) {
         return item;
       }
     }
