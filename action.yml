@@ -43,7 +43,7 @@ outputs:
   previous_release_sha:
     description: The commit SHA of the previous release
 runs:
-  using: node16
+  using: node20
   main: dist/index.js
 branding:
   icon: file-plus
