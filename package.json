@@ -12,6 +12,9 @@
     "prepare": "husky install"
   },
   "license": "ISC",
+  "engines": {
+    "node": "^20.0.0"
+  },
   "dependencies": {
     "@actions/core": "^1.7.0",
     "@actions/github": "^5.0.1",

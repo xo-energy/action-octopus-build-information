@@ -8,12 +8,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
-      
-      # we don't need to build or run nbgv because the tag was already built
-      - uses: actions/checkout@v3
+          node-version-file: package.json
+          cache: npm
 
       # move the tracking tags to the release tag
       - run: |
