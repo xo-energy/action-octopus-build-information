@@ -56,10 +56,10 @@ describe("inputs", () => {
 
   test("getInput calls match action.yml", async () => {
     const { readFileSync } = await import("node:fs");
-    const { default: yaml } = await import("js-yaml");
+    const { load: loadYaml } = await import("js-yaml");
 
     // parse the action.yml file and generate a list of the inputs expected
-    const action = yaml.load(readFileSync("action.yml"));
+    const action = loadYaml(readFileSync("action.yml"));
     const actionInputs = Object.entries(action.inputs).map(([key, value]) => {
       const args = [key];
       if (value.required) args.push({ required: true });

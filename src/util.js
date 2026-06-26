@@ -4,7 +4,6 @@
  * @returns {function} the async memoized wrapper
  */
 function memoizeAsync(func) {
-  // eslint-disable-next-line func-names
   const wrapper = async function (...args) {
     let [key] = args;
     let value;

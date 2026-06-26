@@ -76,13 +76,13 @@ async function getPreviousRef(github, octopus) {
   // find a BuildInformation object matching one of our push packages
   const buildInformationSequence = fp.flatMap(
     (x) => x.BuildInformation,
-    fp.reverse(deployment.Changes)
+    fp.reverse(deployment.Changes),
   );
   const buildInformationForPackage = fp.head(
     fp.filter(
       (x) => x.VcsCommitNumber && inputs.pushPackageIds.includes(x.PackageId),
-      buildInformationSequence
-    )
+      buildInformationSequence,
+    ),
   );
 
   // use that one, if we found one, or if not look for any
@@ -100,8 +100,8 @@ async function getPreviousRef(github, octopus) {
   const version = fp.last(
     fp.filter(
       fp.identity,
-      fp.map((x) => x.Version, deployment.Changes)
-    )
+      fp.map((x) => x.Version, deployment.Changes),
+    ),
   );
   if (!version) {
     core.warning("Deployment does not contain any build information");
@@ -143,7 +143,7 @@ async function getCommits(github, base) {
       base,
       head: context.sha,
     });
-    // eslint-disable-next-line no-restricted-syntax
+
     for await (const response of github.paginate.iterator(request)) {
       commits = commits.concat(response.data.commits);
     }
@@ -217,13 +217,12 @@ async function run() {
         const packageId = inputs.pushPackageIds[i];
         core.info(`Pushing build information for ${packageId} version ${version}`);
 
-        // eslint-disable-next-line no-await-in-loop
         const response = await octopus.postBuildInformation(
           spaceId,
           packageId,
           version,
           build,
-          inputs.pushOverwriteMode
+          inputs.pushOverwriteMode,
         );
 
         // write response to a file
@@ -231,7 +230,7 @@ async function run() {
           const packageIdSanitized = packageId.replace(/[^\w.-]+/g, "_");
           const responsePath = joinPath(
             inputs.outputPath,
-            `buildInformationMapped-${packageIdSanitized}.json`
+            `buildInformationMapped-${packageIdSanitized}.json`,
           );
 
           core.info(`Writing mapped build information response to ${responsePath}`);

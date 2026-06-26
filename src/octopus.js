@@ -55,7 +55,7 @@ class OctopusClient {
           "X-Octopus-ApiKey": this.#octopusApiKey,
         },
       },
-      options
+      options,
     );
     core.debug(`Octopus Deploy API request ${merged.method} ${absoluteUrl}`);
 
@@ -116,7 +116,7 @@ class OctopusClient {
       }
 
       // look for pagination
-      // eslint-disable-next-line no-await-in-loop
+
       payload = await this.sendPageNextRequest(payload);
     } while (payload);
   }
@@ -161,7 +161,7 @@ class OctopusClient {
         projects: projectId,
         environments: environmentId,
         taskState: "Success",
-      }
+      },
     );
 
     // there should be 0 or 1 deployments in the payload

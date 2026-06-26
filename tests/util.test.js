@@ -18,7 +18,7 @@ describe("with no arguments", () => {
 
   test("caches result", async () => {
     let i = 0;
-    // eslint-disable-next-line no-return-assign
+
     const wrapper = memoizeAsync(async () => (i += 1));
     expect(await wrapper()).toBe(1);
     expect(await wrapper()).toBe(1);
