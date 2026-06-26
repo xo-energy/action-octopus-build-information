@@ -13,7 +13,7 @@ import { OctopusClient } from "./octopus.js";
  * @param {OctopusClient} octopus an authenticated Octopus Deploy API client
  * @returns {Promise<string>} the SHA of the previous release, or undefined
  */
-async function getPreviousRef(github, octopus) {
+export async function getPreviousRef(github, octopus) {
   let space;
   let project;
   let environment;
@@ -131,7 +131,7 @@ async function getPreviousRef(github, octopus) {
  * @param {string} base the SHA of the base commit
  * @returns {Promise<array>} an array of commit objects
  */
-async function getCommits(github, base) {
+export async function getCommits(github, base) {
   if (!base) return [];
 
   // compare commits with pagination
@@ -154,7 +154,7 @@ async function getCommits(github, base) {
   return commits;
 }
 
-async function run() {
+export async function run() {
   try {
     const github = getOctokit(inputs.githubToken);
     const octopus = new OctopusClient(inputs.octopusApiKey, inputs.octopusServer);
@@ -248,5 +248,3 @@ async function run() {
     core.setFailed(e.message);
   }
 }
-
-run();
