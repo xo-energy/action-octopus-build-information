@@ -1,6 +1,8 @@
-jest.unmock("../src/util");
+let memoizeAsync;
 
-const { memoizeAsync } = require("../src/util");
+beforeEach(async () => {
+  ({ memoizeAsync } = (await import("../src/util")).default);
+});
 
 test("exports function: memoizeAsync", () => {
   expect(memoizeAsync).toBeInstanceOf(Function);
@@ -24,7 +26,10 @@ describe("with no arguments", () => {
 });
 
 describe("with 1 argument", () => {
-  const wrapper = memoizeAsync(async (key) => ({ key }));
+  let wrapper;
+  beforeEach(() => {
+    wrapper = memoizeAsync(async (key) => ({ key }));
+  });
 
   test("wraps function", () => {
     expect(wrapper).toBeInstanceOf(Function);
@@ -45,7 +50,10 @@ describe("with 1 argument", () => {
 });
 
 describe("with 2 arguments", () => {
-  const wrapper = memoizeAsync(async (key, value) => ({ [key]: value }));
+  let wrapper;
+  beforeEach(() => {
+    wrapper = memoizeAsync(async (key, value) => ({ [key]: value }));
+  });
 
   test("wraps function", () => {
     expect(wrapper).toBeInstanceOf(Function);
