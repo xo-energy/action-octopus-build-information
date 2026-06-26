@@ -1,7 +1,7 @@
 let memoizeAsync;
 
 beforeEach(async () => {
-  ({ memoizeAsync } = (await import("../src/util")).default);
+  ({ memoizeAsync } = await import("../src/util.js"));
 });
 
 test("exports function: memoizeAsync", () => {

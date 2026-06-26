@@ -1,5 +1,7 @@
-const core = require("@actions/core");
-const { defaultsAll, filter, identity, pickBy } = require("lodash/fp");
+import * as core from "@actions/core";
+import fp from "lodash/fp.js";
+
+const { defaultsAll, filter, identity, pickBy } = fp;
 
 const inputs = defaultsAll([
   // use specific inputs when set
@@ -30,4 +32,4 @@ const inputs = defaultsAll([
   },
 ]);
 
-module.exports = inputs;
+export default inputs;

@@ -23,4 +23,4 @@ function memoizeAsync(func) {
   return wrapper;
 }
 
-module.exports = { memoizeAsync };
+export { memoizeAsync };

@@ -1,11 +1,11 @@
-const core = require("@actions/core");
-const { context, getOctokit } = require("@actions/github");
-const fp = require("lodash/fp");
-const fs = require("fs").promises;
-const { join: joinPath } = require("path");
+import * as core from "@actions/core";
+import { context, getOctokit } from "@actions/github";
+import fp from "lodash/fp.js";
+import { promises as fs } from "node:fs";
+import { join as joinPath } from "node:path";
 
-const inputs = require("./inputs");
-const { OctopusClient } = require("./octopus");
+import inputs from "./inputs.js";
+import { OctopusClient } from "./octopus.js";
 
 /**
  * Discover the previous release's SHA by querying the Octopus Deploy API.

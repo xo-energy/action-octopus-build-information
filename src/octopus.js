@@ -1,9 +1,9 @@
-const core = require("@actions/core");
-const fp = require("lodash/fp");
-const nodeFetch = require("node-fetch");
-const { URL } = require("url");
+import * as core from "@actions/core";
+import fp from "lodash/fp.js";
+import nodeFetch from "node-fetch";
+import { URL } from "node:url";
 
-const { memoizeAsync } = require("./util");
+import { memoizeAsync } from "./util.js";
 
 /**
  * Tests whether any of item.Name, item.Id, or item.Slug matches search.
@@ -234,4 +234,4 @@ class OctopusClient {
   }
 }
 
-module.exports = { OctopusClient };
+export { OctopusClient };

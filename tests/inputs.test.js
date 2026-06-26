@@ -1,3 +1,8 @@
+// src/inputs.js now uses ESM `import`, so vi.mock intercepts @actions/core directly.
+// The hoisted getInput spy is shared with the mock factory and survives vi.resetModules().
+const { getInput } = vi.hoisted(() => ({ getInput: vi.fn() }));
+vi.mock("@actions/core", () => ({ getInput }));
+
 const mockInputs = {
   githubToken: "inputtoken",
   octopusApiKey: "API-input",
@@ -19,11 +24,6 @@ const mockEnv = {
   OCTOPUS_SPACE: "EnvSpace",
 };
 
-// src/inputs.js loads @actions/core via require(), which vi.mock cannot intercept.
-// Instead we spy on the real (shared) module's getInput; src/inputs.js sees the same
-// singleton, so the spy reaches it.
-let getInput;
-
 function mockInputsOnce() {
   getInput
     .mockReturnValueOnce(mockInputs.githubToken)
@@ -44,13 +44,9 @@ describe("inputs", () => {
 
   let inputs;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.resetModules();
-
-    const core = await import("@actions/core");
-    getInput = vi.spyOn(core.default, "getInput");
     getInput.mockReset();
-    getInput.mockReturnValue(undefined);
 
     process.env = { ...savedEnv };
 
@@ -59,7 +55,7 @@ describe("inputs", () => {
   });
 
   test("getInput calls match action.yml", async () => {
-    const { readFileSync } = await import("fs");
+    const { readFileSync } = await import("node:fs");
     const { default: yaml } = await import("js-yaml");
 
     // parse the action.yml file and generate a list of the inputs expected
@@ -70,13 +66,13 @@ describe("inputs", () => {
       return args;
     });
 
-    inputs = (await import("../src/inputs")).default;
+    inputs = (await import("../src/inputs.js")).default;
     expect(getInput.mock.calls).toEqual(actionInputs);
   });
 
   describe("when missing", () => {
     beforeEach(async () => {
-      inputs = (await import("../src/inputs")).default;
+      inputs = (await import("../src/inputs.js")).default;
     });
 
     test("has default value: octopusEnvironment", () => {
@@ -118,7 +114,7 @@ describe("inputs", () => {
   describe("when env is provided", () => {
     beforeEach(async () => {
       ({ ...process.env } = mockEnv);
-      inputs = (await import("../src/inputs")).default;
+      inputs = (await import("../src/inputs.js")).default;
     });
 
     test("has env value: octopusApiKey", () => {
@@ -160,7 +156,7 @@ describe("inputs", () => {
   describe("when input is provided", () => {
     beforeEach(async () => {
       mockInputsOnce();
-      inputs = (await import("../src/inputs")).default;
+      inputs = (await import("../src/inputs.js")).default;
     });
 
     test("has input value: githubToken", () => {
@@ -202,7 +198,7 @@ describe("inputs", () => {
     beforeEach(async () => {
       mockInputsOnce();
       ({ ...process.env } = mockEnv);
-      inputs = (await import("../src/inputs")).default;
+      inputs = (await import("../src/inputs.js")).default;
     });
 
     test("has input value: githubToken", () => {
