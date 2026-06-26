@@ -1,6 +1,5 @@
 import * as core from "@actions/core";
 import fp from "lodash/fp.js";
-import nodeFetch from "node-fetch";
 import { URL } from "node:url";
 
 import { memoizeAsync } from "./util.js";
@@ -61,7 +60,7 @@ class OctopusClient {
     core.debug(`Octopus Deploy API request ${merged.method} ${absoluteUrl}`);
 
     // send the request
-    const response = await nodeFetch(absoluteUrl, merged);
+    const response = await fetch(absoluteUrl, merged);
     core.debug(
       // eslint-disable-next-line prettier/prettier
       `Octopus Deploy API response ${response.status} ${response.statusText} ${response.headers.get("content-type")}`
